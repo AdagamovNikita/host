@@ -1,31 +1,35 @@
 # Electronics Store Dashboard
 
-A web-based dashboard for monitoring electronics store sales and inventory data.
+The second phase of the Database Project(CMPS244). 
 
 ## Features
 
-- Real-time sales data visualization
-- Product category analysis
-- Interactive charts with ECharts
-- Sales trend analysis by date
-- Product inventory tracking
+- Top Selling Products table.
+- Top Selling Categories table.
+- Profit display.
+- Revenue display.
+- Brand search.
+- Line chart.
+- Preloader with detailed information for the instructor.
+- Button for adding new records to the database(not ready yet).
 
 ## Tech Stack
 
-- Backend: Python + Flask.
-- Frontend: HTML + CSS + JavaScript.
-- Database: SQLite3.
+- Backend: Python + Flask
+- Frontend: HTML + CSS + JavaScript with ECharts
+- Database: SQLite3
 
 ## Setup Instructions
 
-1. Navigate to the project directory:
+1. Clone the repository:
 ```bash
-cd NewTry
+git clone https://github.com/AdagamovNikita/Dashboard-DB_project-
+cd Dashboard-DB_project-
 ```
 
 2. Install dependencies:
 ```bash
-pip install Flask==3.0.0
+pip install -r requirements.txt
 ```
 
 3. Initialize the database:

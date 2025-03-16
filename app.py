@@ -1,41 +1,46 @@
 from flask import Flask, render_template, jsonify, request, redirect, url_for
 import sqlite3
 
-app = Flask(__name__)
+#so, for the backend I used our lectures about the Flask as a reference. I also used try-except-finally, so the code style should be almost the same. 
 
+app = Flask(__name__)
 def get_db_connection():
     try:
-        conn = sqlite3.connect('store.db')
-        conn.row_factory = sqlite3.Row
+        conn  = sqlite3.connect('store.db')
+        conn.row_factory = sqlite3.Row #I accidentally learned about this  type of object in sqlite while reading some articles about flask with sql and asking chatgpt a lot of questions. it allows us to access the columns by their names instead of numbers.
         return conn
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error:  {e}")
         return None
+
+
 
 @app.route('/')
 def index():
     try:
         conn = get_db_connection()
         if not conn:
-            return jsonify({"error": "Server connection error"})
+            return jsonify({"Sorry, there is a server problem :("})
         brands = conn.execute('SELECT DISTINCT brand_name FROM Product ORDER BY brand_name').fetchall()  
         return render_template('index.html', brands=brands)
-    except Exception as e:
+    except Exception  as e:
         print(f"Error: {e}")
-        return jsonify({"error": "Server error occurred"})
+        return jsonify({"Sorry, there is a server problem :("}) #I also did not know about it before but we need jsonify to convert data into json format for my website.
     finally:
         if conn:
             conn.close()
 
+
+
 @app.route('/search_brand', methods=['POST'])
 def search_brand():
     try:
-        brand = request.form.get('brand')
+        brand =  request.form.get('brand')
         if not brand:
-            return redirect(url_for('index'))
+            return redirect(url_for('index')) #I know nothing about websites, so it was also new for me. It will redirect the user to the main page if the brand is empty.
         conn = get_db_connection()
         if not conn:
-            return jsonify({"error": "Server connection error"})
+            return jsonify({"Sorry, there is a server problem :("})
         results = conn.execute('''
             SELECT
                 p.brand_name AS Brand,
@@ -59,7 +64,7 @@ def search_brand():
             LEFT JOIN 
                 Sale s ON si.sale_SI_id = s.sale_id
             LEFT JOIN 
-                PromoCode pc ON s.code_S_id = pc.code_id
+                PromoCode pc ON s.code_S_id =pc.code_id
             WHERE p.brand_name = ?
             GROUP BY 
                 p.brand_name, p.model, pa.attribute_name, pa.attribute_value, po.quantity, 
@@ -67,20 +72,22 @@ def search_brand():
             ORDER BY 
                 p.brand_name, p.model
         ''', (brand,)).fetchall()
-        return render_template('search_results.html', results=results, brand=brand)
+        return  render_template('search_results.html', results=results, brand=brand)
     except Exception as e:
         print(f"Error: {e}")
-        return jsonify({"error": "Server error occurred"})
+        return jsonify({"Sorry, there is a server problem :("})
     finally:
         if conn:
             conn.close()
+
+
 
 @app.route('/api/top_products')
 def top_products():
     try:
         conn = get_db_connection()
         if not conn:
-            return jsonify({"error": "Server connection error"})
+            return jsonify({"Sorry, there  is a server problem :("})
         products = conn.execute('''
             SELECT 
                 p.brand_name AS Brand,
@@ -89,7 +96,7 @@ def top_products():
             FROM 
                 SaleItem si
             JOIN 
-                ProductOption po ON si.barcode_SI_id = po.barcode_id
+                ProductOption po ON si.barcode_SI_id= po.barcode_id
             JOIN 
                 Product p ON po.product_PO_id = p.product_id
             GROUP BY 
@@ -110,19 +117,22 @@ def top_products():
             'products': [dict(row) for row in products],
             'profit': profit['profit'] / 100 
         })
+        #if I am not miskaten, sqlite does not have a DECIMAL datatype, so I decided to store everything related to money in cents instead of euros and then divide by 100 for display.
     except Exception as e:
         print(f"Error: {e}")
-        return jsonify({"error": "Server error occurred"})
+        return jsonify({"Sorry, there is a server problem :("})
     finally:
         if conn:
             conn.close()
+
+
 
 @app.route('/api/top_categories')
 def top_categories():
     try:
         conn = get_db_connection()
         if not conn:
-            return jsonify({"error": "Server connection error"})
+            return jsonify({"Sorry, there is a server problem :("})
         categories = conn.execute('''
             SELECT 
                 pc.category_name AS Category,
@@ -137,7 +147,7 @@ def top_categories():
             JOIN 
                 SaleItem si ON po.barcode_id = si.barcode_SI_id
             GROUP BY 
-                pc.category_id, pc.category_name
+                pc.category_id,pc.category_name
             ORDER BY 
                 TotalQuantitySold DESC
             LIMIT 5
@@ -152,22 +162,24 @@ def top_categories():
         ''').fetchone()
         return jsonify({
             'categories': [dict(row) for row in categories],
-            'revenue': revenue['revenue'] / 100
+            'revenue': revenue['revenue'] / 100  #same logic
         })
-    except Exception as e:
+    except Exception  as e:
         print(f"Error: {e}")
-        return jsonify({"error": "Server error occurred"})
+        return jsonify({"Sorry, there is a server problem :("})
     finally:
         if conn:
             conn.close()
+
+
 
 @app.route('/api/product_details')
 def product_details():
     try:
         conn = get_db_connection()
         if not conn:
-            return jsonify({"error": "Server connection error"})
-        products = conn.execute('''
+            return jsonify({"Sorry, there is a server problem :("})
+        products= conn.execute('''
             SELECT 
                 p.brand_name AS Brand,
                 p.model AS Model,
@@ -188,39 +200,41 @@ def product_details():
             JOIN 
                 Supplier s ON ps.supplier_PS_id = s.supplier_id
             GROUP BY 
-                p.product_id, p.brand_name, p.model, po.sale_price, s.supplier_name, s.phone_number, s.address
+                p.product_id
             ORDER BY 
                 TotalQuantitySold DESC
-            LIMIT 10
         ''').fetchall()
-        return jsonify([dict(row) for row in products])
+        return jsonify([dict(row) for row in products]) 
     except Exception as e:
         print(f"Error: {e}")
-        return jsonify({"error": "Server error occurred"})
+        return jsonify({"Sorry, there is a server problem :( "})
     finally:
         if conn:
             conn.close()
 
+
+
 @app.route('/api/category_details')
 def category_details():
     try:
-        conn = get_db_connection()
+        conn =  get_db_connection()
         if not conn:
-            return jsonify({"error": "Server connection error"})
+            return jsonify({"Sorry, there is  a server problem :("})
         categories = conn.execute('''
             SELECT 
                 pc.category_name AS Category,
                 COUNT(DISTINCT p.product_id) AS NumberOfProducts,
                 SUM(si.quantity_sold) AS TotalQuantitySold,
-                SUM(po.sale_price * si.quantity_sold) AS TotalRevenue,
-                AVG((po.sale_price - po.wholesale_price) * 100.0 / po.sale_price) AS AverageMargin
+                AVG(po.sale_price) AS AverageProductPrice,
+                MAX(po.sale_price) AS MaximumProductPrice,
+                SUM(si.price_sold_without_vat) AS TotalRevenue
             FROM 
                 ProductCategory pc
             JOIN 
                 Product p ON pc.category_id = p.category_P_id
             JOIN 
                 ProductOption po ON p.product_id = po.product_PO_id
-            LEFT JOIN 
+            JOIN 
                 SaleItem si ON po.barcode_id = si.barcode_SI_id
             GROUP BY 
                 pc.category_id, pc.category_name
@@ -230,17 +244,19 @@ def category_details():
         return jsonify([dict(row) for row in categories])
     except Exception as e:
         print(f"Error: {e}")
-        return jsonify({"error": "Server error occurred"})
+        return  jsonify({"Sorry, there is a server problem :("})
     finally:
         if conn:
             conn.close()
+
+
 
 @app.route('/api/chart-filters')
 def get_chart_filters():
     try:
         conn = get_db_connection()
         if not conn:
-            return jsonify({"error": "Server connection error"})
+            return jsonify({"Sorry,  there is a server problem :("})
         categories = conn.execute('''
             SELECT category_id, category_name 
             FROM ProductCategory 
@@ -251,31 +267,35 @@ def get_chart_filters():
         })
     except Exception as e:
         print(f"Error: {e}")
-        return jsonify({"error": "Server error occurred"})
+        return jsonify({"Sorry, there is a server problem :("})
     finally:
-        if conn:
+        if  conn:
             conn.close()
+
+
+
 
 @app.route('/api/sales-data', methods=['POST'])
 def get_sales_data():
     try:
-        category_id = request.form.get('category_id')
+        category_id= request.form.get('category_id')
         if not category_id:
-            return jsonify({"error": "Category is required"})
+            return jsonify({"Category is required"})
         conn = get_db_connection()
         if not conn:
-            return jsonify({"error": "Server connection error"})
+            return jsonify({"Sorry, there is a server problem :("})
         results = conn.execute('''
             SELECT 
-                s.sale_date,
-                SUM(si.quantity_sold) AS total_quantity,
-                SUM(si.price_sold_without_vat) AS total_sales
+                s.sale_date AS SaleDate,
+                SUM(si.quantity_sold) AS TotalQuantity,
+                SUM(si.price_sold_without_vat) AS TotalSales
             FROM 
                 SaleItem si
-            JOIN Sale s ON si.sale_SI_id = s.sale_id
+            JOIN Sale s ON si.sale_SI_id= s.sale_id
             JOIN ProductOption po ON si.barcode_SI_id = po.barcode_id
             JOIN Product p ON po.product_PO_id = p.product_id
             JOIN ProductCategory pc ON p.category_P_id = pc.category_id
+
             WHERE 
                 pc.category_id = ?
             GROUP BY 
@@ -284,16 +304,18 @@ def get_sales_data():
                 s.sale_date
         ''', (category_id,)).fetchall()
         return jsonify([{
-            'date': row['sale_date'],
-            'quantity': row['total_quantity'],
-            'sales': row['total_sales'] / 100
-        } for row in results])
+            'date': row['SaleDate'],
+            'quantity': row['TotalQuantity'],
+            'sales': row['TotalSales']
+        } for row  in results])
     except Exception as e:
         print(f"Error: {e}")
-        return jsonify({"error": "Server error occurred"})
+        return jsonify({"Sorry, there is a server problem :( "})
     finally:
         if conn:
             conn.close()
 
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True) 

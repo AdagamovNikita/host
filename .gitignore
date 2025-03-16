@@ -1,4 +1,4 @@
-# Python
+
 __pycache__/
 *.py[cod]
 *$py.class
@@ -21,23 +21,23 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual Environment
+
 venv/
 ENV/
 
-# Database
+
 *.db
 *.sqlite3
 
-# IDE
+
 .idea/
 .vscode/
 *.swp
 *.swo
 
-# Logs
+
 *.log
 
-# Local environment
+
 .env
 .env.local

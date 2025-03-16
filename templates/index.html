@@ -1082,8 +1082,9 @@
                 <p>This project was developed as follows:</p>
                 <ul>
                     <li>The database and all SQL queries were created entirely by me.</li>
+                    <li>Some parts of init_db.py related to populating the database with sample data were done with a little help from ChatGPT, as I wasn't sure how to implement them myself.</li>
                     <li>I built 80% of the backend (Python + Flask) myself, with some guidance from ChatGPT for certain aspects I was unsure about.</li>
-                    <li>The entire frontend (HTML, CSS, JS) was AI-generated, but integrating it correctly was quite challenging.</li>
+                    <li>The entire frontend (HTML, CSS, JS) was AI-generated (Cursor AI, Windsurf), but integrating it correctly was quite challenging.</li>
                 </ul>
                 <p>Student: Nikita Adagamov<br>
                 Instructor: Rafael Papallas, 2025</p>
@@ -1726,14 +1727,10 @@
                             name: 'Sales',
                             type: 'line',
                             smooth: true,
-                            symbolSize: 8,
+                            showSymbol: false,
                             data: sales,
                             itemStyle: {
-                                color: '#2196f3',
-                                borderColor: '#fff',
-                                borderWidth: 2,
-                                shadowColor: 'rgba(33, 150, 243, 0.5)',
-                                shadowBlur: 10
+                                color: '#2196f3'
                             },
                             lineStyle: {
                                 width: 4,
@@ -1749,12 +1746,6 @@
                                 shadowColor: 'rgba(33, 150, 243, 0.2)',
                                 shadowBlur: 20
                             },
-                            emphasis: {
-                                itemStyle: {
-                                    borderWidth: 3,
-                                    shadowBlur: 20
-                                }
-                            },
                             animationDuration: 2000,
                             animationEasing: 'cubicInOut'
                         },
@@ -1762,15 +1753,11 @@
                             name: 'Quantity',
                             type: 'line',
                             smooth: true,
-                            symbolSize: 8,
+                            showSymbol: false,
                             yAxisIndex: 1,
                             data: quantities,
                             itemStyle: {
-                                color: '#00bcd4',
-                                borderColor: '#fff',
-                                borderWidth: 2,
-                                shadowColor: 'rgba(0, 188, 212, 0.5)',
-                                shadowBlur: 10
+                                color: '#00bcd4'
                             },
                             lineStyle: {
                                 width: 4,
@@ -1785,12 +1772,6 @@
                                 ]),
                                 shadowColor: 'rgba(0, 188, 212, 0.2)',
                                 shadowBlur: 20
-                            },
-                            emphasis: {
-                                itemStyle: {
-                                    borderWidth: 3,
-                                    shadowBlur: 20
-                                }
                             },
                             animationDuration: 2000,
                             animationEasing: 'cubicInOut',
@@ -1830,11 +1811,11 @@
                     isPreloaderActive = true;
                     preloader.classList.add('active');
                     
-                    // Show preloader for 8 seconds
+                    // Show preloader for 12 seconds
                     setTimeout(() => {
                         preloader.classList.remove('active');
                         isPreloaderActive = false;
-                    }, 8000); // Changed from 3000 to 8000 milliseconds
+                    }, 12000);
                 }
             });
 

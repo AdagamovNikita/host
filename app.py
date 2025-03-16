@@ -1,19 +1,21 @@
 from flask import Flask, render_template, jsonify, request, redirect, url_for
 import sqlite3
-
-#so, for the backend I used our lectures about the Flask as a reference. I also used try-except-finally, so the code style should be almost the same. 
+import os
 
 app = Flask(__name__)
+app.secret_key = 'maxika13572461'  # Add a secret key
+
+# Use absolute paths for PythonAnywhere
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+DATABASE = os.path.join(APP_ROOT, 'store.db')
+TEMPLATE_FOLDER = os.path.join(APP_ROOT, 'templates')
+
 def get_db_connection():
-    try:
-        conn  = sqlite3.connect('store.db')
-        conn.row_factory = sqlite3.Row #I accidentally learned about this  type of object in sqlite while reading some articles about flask with sql and asking chatgpt a lot of questions. it allows us to access the columns by their names instead of numbers.
-        return conn
-    except Exception as e:
-        print(f"Error:  {e}")
-        return None
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
 
-
+#so, for the backend I used our lectures about the Flask as a reference. I also used try-except-finally, so the code style should be almost the same. 
 
 @app.route('/')
 def index():
@@ -22,7 +24,7 @@ def index():
         if not conn:
             return jsonify({"Sorry, there is a server problem :("})
         brands = conn.execute('SELECT DISTINCT brand_name FROM Product ORDER BY brand_name').fetchall()  
-        return render_template('index.html', brands=brands)
+        return render_template(os.path.join(TEMPLATE_FOLDER, 'index.html'), brands=brands)
     except Exception  as e:
         print(f"Error: {e}")
         return jsonify({"Sorry, there is a server problem :("}) #I also did not know about it before but we need jsonify to convert data into json format for my website.
@@ -72,7 +74,7 @@ def search_brand():
             ORDER BY 
                 p.brand_name, p.model
         ''', (brand,)).fetchall()
-        return  render_template('search_results.html', results=results, brand=brand)
+        return  render_template(os.path.join(TEMPLATE_FOLDER, 'search_results.html'), results=results, brand=brand)
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({"Sorry, there is a server problem :("})
@@ -318,4 +320,4 @@ def get_sales_data():
 
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(debug=False) 

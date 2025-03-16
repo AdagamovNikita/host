@@ -2,12 +2,18 @@ import sqlite3
 from datetime import datetime, timedelta
 import random
 import time
+import os
+
 random.seed(time.time()) #I need it to set different colors for items in my database.
+
+# Use absolute paths for PythonAnywhere
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+DATABASE = os.path.join(APP_ROOT, 'store.db')
 
 #these are all the tables I created while looking at my database schema from phase 1.
 def init_db():
     try:
-        conn = sqlite3.connect('store.db')
+        conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
         cursor.executescript('''
             CREATE TABLE Product (

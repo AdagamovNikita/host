@@ -3,11 +3,13 @@ import sqlite3
 import os
 
 app = Flask(__name__)
-app.secret_key = 'maxika13572461'  # Add a secret key
+app.secret_key = 'maxika13572461'
 
 # Use persistent storage path on Render, fallback to local path
 if os.environ.get('RENDER'):
-    DATABASE = '/opt/render/project/src/data/store.db'
+    DATA_DIR = '/opt/render/project/src/data'
+    os.makedirs(DATA_DIR, exist_ok=True)
+    DATABASE = os.path.join(DATA_DIR, 'store.db')
 else:
     APP_ROOT = os.path.dirname(os.path.abspath(__file__))
     DATABASE = os.path.join(APP_ROOT, 'store.db')
@@ -15,36 +17,38 @@ else:
 TEMPLATE_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 
 def get_db_connection():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-#so, for the backend I used our lectures about the Flask as a reference. I also used try-except-finally, so the code style should be almost the same. 
+    try:
+        conn = sqlite3.connect(DATABASE)
+        conn.row_factory = sqlite3.Row
+        return conn
+    except sqlite3.Error as e:
+        app.logger.error(f"Database connection error: {str(e)}")
+        raise
 
 @app.route('/')
 def index():
+    conn = None
     try:
         conn = get_db_connection()
+        if not os.path.exists(DATABASE):
+            raise Exception(f"Database file not found at {DATABASE}")
         brands = conn.execute('SELECT DISTINCT brand_name FROM Product ORDER BY brand_name').fetchall()
-        conn.close()
         return render_template(os.path.join(TEMPLATE_FOLDER, 'index.html'), brands=brands)
     except Exception as e:
+        app.logger.error(f"Error in index route: {str(e)}")
         return jsonify({"error": str(e)}), 500
-    #except Exception  as e:
-    #    print(f"Error: {e}")
-    #    return jsonify({"Sorry, there is a server problem :("}) #I also did not know about it before but we need jsonify to convert data into json format for my website.
-    #finally:
-    #    if conn:
-    #        conn.close()
-
+    finally:
+        if conn:
+            conn.close()
 
 
 @app.route('/search_brand', methods=['POST'])
 def search_brand():
+    conn = None
     try:
-        brand =  request.form.get('brand')
+        brand = request.form.get('brand')
         if not brand:
-            return redirect(url_for('index')) #I know nothing about websites, so it was also new for me. It will redirect the user to the main page if the brand is empty.
+            return redirect(url_for('index'))
         conn = get_db_connection()
         if not conn:
             return jsonify({"Sorry, there is a server problem :("})
@@ -79,18 +83,18 @@ def search_brand():
             ORDER BY 
                 p.brand_name, p.model
         ''', (brand,)).fetchall()
-        return  render_template(os.path.join(TEMPLATE_FOLDER, 'search_results.html'), results=results, brand=brand)
+        return render_template(os.path.join(TEMPLATE_FOLDER, 'search_results.html'), results=results, brand=brand)
     except Exception as e:
-        print(f"Error: {e}")
+        app.logger.error(f"Error in search_brand route: {str(e)}")
         return jsonify({"error": str(e)}), 500
     finally:
         if conn:
             conn.close()
 
 
-
 @app.route('/api/top_products')
 def top_products():
+    conn = None
     try:
         conn = get_db_connection()
         if not conn:
@@ -122,20 +126,19 @@ def top_products():
         ''').fetchone()
         return jsonify({
             'products': [dict(row) for row in products],
-            'profit': profit['profit'] / 100 
+            'profit': profit['profit'] / 100
         })
-        #if I am not miskaten, sqlite does not have a DECIMAL datatype, so I decided to store everything related to money in cents instead of euros and then divide by 100 for display.
     except Exception as e:
-        print(f"Error: {e}")
+        app.logger.error(f"Error in top_products route: {str(e)}")
         return jsonify({"error": str(e)}), 500
     finally:
         if conn:
             conn.close()
 
 
-
 @app.route('/api/top_categories')
 def top_categories():
+    conn = None
     try:
         conn = get_db_connection()
         if not conn:
@@ -169,24 +172,24 @@ def top_categories():
         ''').fetchone()
         return jsonify({
             'categories': [dict(row) for row in categories],
-            'revenue': revenue['revenue'] / 100  #same logic
+            'revenue': revenue['revenue'] / 100
         })
-    except Exception  as e:
-        print(f"Error: {e}")
+    except Exception as e:
+        app.logger.error(f"Error in top_categories route: {str(e)}")
         return jsonify({"error": str(e)}), 500
     finally:
         if conn:
             conn.close()
 
 
-
 @app.route('/api/product_details')
 def product_details():
+    conn = None
     try:
         conn = get_db_connection()
         if not conn:
             return jsonify({"Sorry, there is a server problem :("})
-        products= conn.execute('''
+        products = conn.execute('''
             SELECT 
                 p.brand_name AS Brand,
                 p.model AS Model,
@@ -211,20 +214,20 @@ def product_details():
             ORDER BY 
                 TotalQuantitySold DESC
         ''').fetchall()
-        return jsonify([dict(row) for row in products]) 
+        return jsonify([dict(row) for row in products])
     except Exception as e:
-        print(f"Error: {e}")
+        app.logger.error(f"Error in product_details route: {str(e)}")
         return jsonify({"error": str(e)}), 500
     finally:
         if conn:
             conn.close()
 
 
-
 @app.route('/api/category_details')
 def category_details():
+    conn = None
     try:
-        conn =  get_db_connection()
+        conn = get_db_connection()
         if not conn:
             return jsonify({"Sorry, there is  a server problem :("})
         categories = conn.execute('''
@@ -250,16 +253,16 @@ def category_details():
         ''').fetchall()
         return jsonify([dict(row) for row in categories])
     except Exception as e:
-        print(f"Error: {e}")
-        return  jsonify({"error": str(e)}), 500
+        app.logger.error(f"Error in category_details route: {str(e)}")
+        return jsonify({"error": str(e)}), 500
     finally:
         if conn:
             conn.close()
 
 
-
 @app.route('/api/chart-filters')
 def get_chart_filters():
+    conn = None
     try:
         conn = get_db_connection()
         if not conn:
@@ -273,19 +276,18 @@ def get_chart_filters():
             'categories': [dict(row) for row in categories]
         })
     except Exception as e:
-        print(f"Error: {e}")
+        app.logger.error(f"Error in get_chart_filters route: {str(e)}")
         return jsonify({"error": str(e)}), 500
     finally:
-        if  conn:
+        if conn:
             conn.close()
-
-
 
 
 @app.route('/api/sales-data', methods=['POST'])
 def get_sales_data():
+    conn = None
     try:
-        category_id= request.form.get('category_id')
+        category_id = request.form.get('category_id')
         if not category_id:
             return jsonify({"Category is required"})
         conn = get_db_connection()
@@ -314,15 +316,14 @@ def get_sales_data():
             'date': row['SaleDate'],
             'quantity': row['TotalQuantity'],
             'sales': row['TotalSales']
-        } for row  in results])
+        } for row in results])
     except Exception as e:
-        print(f"Error: {e}")
+        app.logger.error(f"Error in get_sales_data route: {str(e)}")
         return jsonify({"error": str(e)}), 500
     finally:
         if conn:
             conn.close()
 
 
-
 if __name__ == '__main__':
-    app.run(debug=False) 
+    app.run(debug=False)

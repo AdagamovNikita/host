@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Results - {{ brand }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gradient-1: linear-gradient(45deg, #0b1c48, #2196f3);
+            --gradient-2: linear-gradient(135deg, #1565c0, #03a9f4);
+            --gradient-3: linear-gradient(225deg, #0288d1, #80deea);
+            --glass-bg: rgba(33, 150, 243, 0.1);
+            --glass-border: rgba(33, 150, 243, 0.2);
+            --neon-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, #0b1c4820 0%, #000 70%);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--neon-shadow);
+        }
+
+        .header:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(33, 150, 243, 0.7);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-top: 1rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradient-shift 8s infinite;
+        }
+
+        .back-button {
+            background: var(--gradient-1);
+            border: none;
+            border-radius: 10px;
+            padding: 0.8rem 2rem;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--neon-shadow);
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(33, 150, 243, 0.6);
+        }
+
+        .back-button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(33, 150, 243, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: buttonGlow 2s linear infinite;
+        }
+
+        .results-table {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--neon-shadow);
+            overflow-x: auto;
+        }
+
+        .results-table:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(33, 150, 243, 0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0.5rem 0.5rem;
+            margin-top: 1rem;
+        }
+
+        th {
+            color: #fff;
+            font-weight: 600;
+            padding: 1rem;
+            text-align: left;
+            background: rgba(11, 28, 72, 0.3);
+            border-radius: 10px;
+            box-shadow: inset 0 0 10px rgba(33, 150, 243, 0.2);
+            margin-right: 0.5rem;
+        }
+
+        td {
+            padding: 1rem;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s ease;
+        }
+
+        tr {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        tr:hover td {
+            background: rgba(33, 150, 243, 0.1);
+            box-shadow: 0 0 15px rgba(33, 150, 243, 0.2);
+            transform: scale(1.01);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes buttonGlow {
+            0% {
+                transform: translateX(-100%) rotate(45deg);
+            }
+            100% {
+                transform: translateX(100%) rotate(45deg);
+            }
+        }
+
+        @keyframes gradient-shift {
+            0% {
+                background-position: 0% 50%;
+                filter: hue-rotate(0deg);
+            }
+            50% {
+                background-position: 100% 50%;
+                filter: hue-rotate(10deg);
+            }
+            100% {
+                background-position: 0% 50%;
+                filter: hue-rotate(0deg);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .results-table {
+                overflow-x: auto;
+            }
+            
+            table {
+                min-width: 1000px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .header, .results-table {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-button">← Back to Dashboard</a>
+            <h1>Search Results for {{ brand }}</h1>
+        </div>
+
+        <div class="results-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Brand</th>
+                        <th>Model</th>
+                        <th>Attribute</th>
+                        <th>Value</th>
+                        <th>Quantity</th>
+                        <th>Wholesale Price</th>
+                        <th>Sale Price</th>
+                        <th>New Price</th>
+                        <th>Change Date</th>
+                        <th>Promo Code</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr style="animation-delay: {{ loop.index0 * 0.1 }}s">
+                        <td>{{ result.Brand }}</td>
+                        <td>{{ result.Model }}</td>
+                        <td>{{ result.AttributeName }}</td>
+                        <td>{{ result.AttributeValue }}</td>
+                        <td>{{ result.Quantity }}</td>
+                        <td>${{ "%.2f"|format(result.WholesalePrice/100) }}</td>
+                        <td>${{ "%.2f"|format(result.SalePrice/100) }}</td>
+                        <td>{{ result.NewPrice }}</td>
+                        <td>{{ result.ChangeDate }}</td>
+                        <td>{{ result.PromoCode if result.PromoCode else '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html> 

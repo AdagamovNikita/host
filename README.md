@@ -1,45 +1,31 @@
 # Electronics Store Dashboard
 
-A simple web application that displays an interactive dashboard for an electronics store. The dashboard shows top-selling products, categories, and allows searching by brand.
+A web-based dashboard for monitoring electronics store sales and inventory data.
 
 ## Features
 
-- Display top selling products with total quantity sold and profit
-- Display top selling categories with number of products and revenue
-- Search products by brand
-- Detailed product and category information
-- SQLite database for data storage
+- Real-time sales data visualization
+- Product category analysis
+- Interactive charts with ECharts
+- Sales trend analysis by date
+- Product inventory tracking
 
 ## Tech Stack
 
-- Backend: Python + Flask
-- Frontend: HTML + CSS + JavaScript
-- Database: SQLite3
-
-## Project Structure
-
-```
-electronics-store/
-├── app.py              # Flask application
-├── init_db.py         # Database initialization script
-├── requirements.txt   # Python dependencies
-├── templates/        # HTML templates
-│   ├── index.html
-│   └── search_results.html
-└── store.db          # SQLite database (generated)
-```
+- Backend: Python + Flask.
+- Frontend: HTML + CSS + JavaScript.
+- Database: SQLite3.
 
 ## Setup Instructions
 
-1. Clone the repository:
+1. Navigate to the project directory:
 ```bash
-git clone <your-repository-url>
-cd electronics-store
+cd NewTry
 ```
 
 2. Install dependencies:
 ```bash
-pip install -r requirements.txt
+pip install Flask==3.0.0
 ```
 
 3. Initialize the database:
@@ -54,23 +40,5 @@ python app.py
 
 5. Open your web browser and go to:
 ```
-http://localhost:5000
+http://127.0.0.1:5000
 ```
-
-## Database Schema
-
-The application uses several interconnected tables:
-- Product
-- ProductCategory
-- ProductOption
-- ProductAttribute
-- PriceHistory
-- Supplier
-- ProductSupplier
-- PromoCode
-- Sale
-- SaleItem
-
-## Contributing
-
-Feel free to submit issues and enhancement requests! 

@@ -10,18 +10,14 @@ def init_db():
         conn = sqlite3.connect('store.db')
         cursor = conn.cursor()
         cursor.executescript('''
-            CREATE TABLE IF NOT EXISTS ProductCategory (
-                category_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                category_name TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS Product (
+            CREATE TABLE Product (
                 product_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 model TEXT NOT NULL,
                 category_P_id INTEGER,
                 brand_name TEXT,
                 FOREIGN KEY (category_P_id) REFERENCES ProductCategory(category_id)
             );
-            CREATE TABLE IF NOT EXISTS ProductOption (
+            CREATE TABLE ProductOption (
                 product_PO_id INTEGER,
                 barcode_id TEXT PRIMARY KEY,
                 quantity INTEGER NOT NULL,
@@ -29,7 +25,7 @@ def init_db():
                 sale_price INTEGER NOT NULL,
                 FOREIGN KEY (product_PO_id) REFERENCES Product(product_id)
             );
-            CREATE TABLE IF NOT EXISTS ProductAttribute (
+            CREATE TABLE ProductAttribute (
                 barcode_PA_id TEXT,
                 attribute_id INTEGER,
                 attribute_name TEXT NOT NULL,
@@ -37,7 +33,7 @@ def init_db():
                 PRIMARY KEY (barcode_PA_id, attribute_id),
                 FOREIGN KEY (barcode_PA_id) REFERENCES ProductOption(barcode_id)
             );
-            CREATE TABLE IF NOT EXISTS PriceHistory (
+            CREATE TABLE PriceHistory (
                 barcode_PH_id TEXT,
                 price_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 old_price INTEGER NOT NULL,
@@ -45,26 +41,24 @@ def init_db():
                 change_date DATETIME NOT NULL,
                 FOREIGN KEY (barcode_PH_id) REFERENCES ProductOption(barcode_id)
             );
-            CREATE TABLE IF NOT EXISTS Supplier (
+            CREATE TABLE ProductCategory (
+                category_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                category_name TEXT NOT NULL
+            );
+            CREATE TABLE Supplier (
                 supplier_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 supplier_name TEXT NOT NULL,
                 phone_number TEXT,
                 address TEXT
             );
-            CREATE TABLE IF NOT EXISTS ProductSupplier (
+            CREATE TABLE ProductSupplier (
                 product_PS_id INTEGER,
                 supplier_PS_id INTEGER,
                 PRIMARY KEY (product_PS_id, supplier_PS_id),
                 FOREIGN KEY (product_PS_id) REFERENCES Product(product_id),
                 FOREIGN KEY (supplier_PS_id) REFERENCES Supplier(supplier_id)
             );
-            CREATE TABLE IF NOT EXISTS PromoCode (
-                code_id TEXT PRIMARY KEY,
-                discount_percentage INTEGER NOT NULL,
-                valid_from DATE NOT NULL,
-                valid_to DATE NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS Sale (
+            CREATE TABLE Sale (
                 sale_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 sale_date DATETIME NOT NULL,
                 source_name TEXT,
@@ -75,7 +69,13 @@ def init_db():
                 total_price_with_vat INTEGER NOT NULL,
                 FOREIGN KEY (code_S_id) REFERENCES PromoCode(code_id)
             );
-            CREATE TABLE IF NOT EXISTS SaleItem (
+            CREATE TABLE PromoCode (
+                code_id TEXT PRIMARY KEY,
+                discount_percentage INTEGER NOT NULL,
+                valid_from DATE NOT NULL,
+                valid_to DATE NOT NULL
+            );
+            CREATE TABLE SaleItem (
                 sale_SI_id INTEGER,
                 sale_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 barcode_SI_id TEXT NOT NULL,
@@ -174,19 +174,36 @@ def init_db():
 
 
 
+        sale_items_data = [
+           ('APP15P-256', 1, 10, 99900),
+            ('APP15-128', 1, 12, 79900),
+            ('SAM-S24U', 1, 8, 89900),
+            ('SON-XP1V', 1, 6, 94900),
+            ('APP-MBP16', 1, 5, 199900),
+            ('DEL-XPS15', 1, 7, 179900),
+            ('LEN-X1C', 1, 6, 149900),
+            ('SAM-BOOK4', 1, 4, 149900),
+            ('APP-IPAD12', 1, 8, 99900),
+            ('SAM-TABS9', 1, 10, 79900),
+            ('LEN-TABP12', 1, 7, 84900),
+            ('APP-WATCH9', 1, 15, 39900),
+            ('SAM-WATCH6', 1, 12, 29900),
+            ('SAM-BUDSP', 1, 20, 19900),
+            ('SON-WH1000', 1, 18, 29900),
+            ('SON-WF1000', 1, 25, 19900)
+        ]
+
+
+#here I just make a LOT of data to make graphs look good.
         sales = []
         current_date = datetime.now()
         start_date = current_date - timedelta(days=365)
-        
-        # Generate more varied sales data
-        for i in range(500):  # Increased number of sales
+        for i in range(500): 
             random_days = random.randint(0, 365)
             sale_date = start_date + timedelta(days=random_days)
             sale_source = random.choice(['Online', 'Store'])
             promo_code = random.choice(['WELCOME10', None])
             sale_tax_rate = 20
-            
-            # More realistic price ranges based on product categories
             total_price_without_vat = random.randint(15000, 200000)
             vat_paid = total_price_without_vat * sale_tax_rate // 100
             total_price_with_vat = total_price_without_vat + vat_paid
@@ -194,76 +211,20 @@ def init_db():
 
 
 
-        # Store product information in a more readable format
-        # Each product has: (barcode, min_quantity, max_quantity, price in cents)
-        sale_items_data = [
-            # Smartphones
-            ('APP15P-256', 1, 10, 99900),
-            ('APP15-128', 1, 12, 79900),
-            ('SAM-S24U', 1, 8, 89900),
-            ('SON-XP1V', 1, 6, 94900),
-            
-            # Laptops
-            ('APP-MBP16', 1, 5, 199900),
-            ('DEL-XPS15', 1, 7, 179900),
-            ('LEN-X1C', 1, 6, 149900),
-            ('SAM-BOOK4', 1, 4, 149900),
-            
-            # Tablets
-            ('APP-IPAD12', 1, 8, 99900),
-            ('SAM-TABS9', 1, 10, 79900),
-            ('LEN-TABP12', 1, 7, 84900),
-            
-            # Smartwatches
-            ('APP-WATCH9', 1, 15, 39900),
-            ('SAM-WATCH6', 1, 12, 29900),
-            
-            # Accessories
-            ('SAM-BUDSP', 1, 20, 19900),
-            ('SON-WH1000', 1, 18, 29900),
-            ('SON-WF1000', 1, 25, 19900)
-        ]
-
-        # For each sale in our sales list
         for sale in sales:
-            # First, add the main sale information to the database
             cursor.execute('''
                 INSERT INTO Sale (sale_date, source_name, code_S_id, tax_rate,
                                 total_price_without_vat, vat_paid, total_price_with_vat)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', sale)
-            
-            # Get the ID of the sale we just created
             sale_id = cursor.lastrowid
-            
-            # Choose a random number of items (between 1 and 4) for this sale
-            num_items = random.randint(1, 4)
-            
-            # Randomly select that many different products
-            items_for_this_sale = random.sample(sale_items_data, num_items)
-            
-            # Add each selected item to the sale
-            for item in items_for_this_sale:
-                # Unpack the item information
-                barcode = item[0]
-                min_quantity = item[1]
-                max_quantity = item[2]
-                price = item[3]
-                
-                # Generate random quantity based on the min and max values
-                quantity = random.randint(min_quantity, max_quantity)
-                
-                # Add this item to the SaleItem table
+            items_for_this_sale = random.sample(sale_items_data, random.randint(1, 4)) #here chatgpt helped me a lot because I did not know how to make it properly using random values.
+            for barcode, min_qty, max_qty, price in items_for_this_sale:
                 cursor.execute('''
                     INSERT INTO SaleItem (sale_SI_id, barcode_SI_id, quantity_sold, price_sold_without_vat)
                     VALUES (?, ?, ?, ?)
-                ''', (sale_id, barcode, quantity, price))
-
-        # Save all changes to the database
+                ''', (sale_id, barcode, random.randint(min_qty, max_qty), price)) #same
         conn.commit()
-
-
-        
     except sqlite3.Error as e:
         print(f"SQLite error happened: {e}")
     except Exception as e:

@@ -2,11 +2,14 @@ services:
   - type: web
     name: electronics-dashboard
     env: python
-    buildCommand: ./build.sh
+    plan: free
+    buildCommand: chmod +x build.sh && ./build.sh
     startCommand: gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.10.0
+      - key: RENDER
+        value: "true"
     disk:
       name: sqlite
       mountPath: /opt/render/project/src/data

@@ -4,18 +4,18 @@ import random
 import time
 import os
 
-random.seed(time.time()) #I need it to set different colors for items in my database.
+random.seed(time.time())
 
 # Use persistent storage path on Render, fallback to local path
 if os.environ.get('RENDER'):
-    DATABASE = '/opt/render/project/src/data/store.db'
+    DATA_DIR = '/opt/render/project/src/data'
+    os.makedirs(DATA_DIR, exist_ok=True)
+    DATABASE = os.path.join(DATA_DIR, 'store.db')
 else:
     APP_ROOT = os.path.dirname(os.path.abspath(__file__))
     DATABASE = os.path.join(APP_ROOT, 'store.db')
 
-# Ensure the data directory exists on Render
-if os.environ.get('RENDER'):
-    os.makedirs('/opt/render/project/src/data', exist_ok=True)
+print(f"Initializing database at: {DATABASE}")
 
 #these are all the tables I created while looking at my database schema from phase 1.
 def init_db():
